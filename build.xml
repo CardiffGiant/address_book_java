@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+<!--author: Jeff Carmichael-->
+<!--Basic build file to compile and run the Address Book Application and tests-->
+<project name="Address Book Buildfile" default="compile" basedir=".">
+  <!--Sets the variables for directories-->
+  <property name="dir.src" value="src"/>
+  <property name="dir.build" value="build"/>
+  <property name="dir.dist" value="dist"/>
+  <property name="dir.test" value="test"/>
+  
+  <!--Sets the classpath for use by JUnit-->
+  <path id="test.classpath">
+    <pathelement location="./lib/junit-4.10.jar"/>
+    <pathelement location="${dir.build}"/>
+    <fileset dir="${dir.dist}">
+      <include name="*.jar"/>
+    </fileset>
+  </path>
+  
+  <!--Creates the Ant task for running JUnit and utilizes a test suite-->
+  <target name="test" depends="compile">
+    <echo>Trying to test...</echo>
+    <junit printsummary="yes" haltonfailure="yes" fork="yes">
+      <test name="ict4315.unit10.JunitTestSuite" />
+      <formatter type="brief" usefile="false" />
+      <classpath refid="test.classpath" />
+    </junit>
+  </target>
+
+  <!-- Creates the output directories -->
+  <target name="prepare">
+    <mkdir dir="${dir.build}"/>
+    <mkdir dir="${dir.dist}"/>
+  </target>
+  
+  <!--deletes files created in prepare-->
+  <target name="clean" description="Remove all generated files.">
+    <delete dir="${dir.build}"/>
+    <delete dir="${dir.dist}"/>
+  </target>
+  
+  <!--compiles the class files in both src directories (top level and in test)-->
+  <target name="compile" depends="prepare" description="Compile all source code.">
+    <javac includeantruntime="false" srcdir="${dir.src}" sourcepath="src" destdir="${dir.build}"/>
+    <javac includeantruntime="false" srcdir="${dir.test}" sourcepath="test" destdir="${dir.build}" classpath="lib/junit-4.10.jar"/>
+  </target>
+  
+  <!--creates a jar file containing the class files and sets main class-->
+  <target name="jar" depends="compile" description="Generates addressBook.jar in the 'dist' directory.">
+     <jar jarfile="${dir.dist}/addressBook.jar" basedir="${dir.build}">
+        <manifest>
+           <attribute name="Main-Class" value="ict4315.unit10.AddressBookDriver"/>
+        </manifest>
+     </jar>
+  </target>
+  
+  <!--runs the jar file (the tests for Deque)-->
+  <target name="run" depends="jar">
+     <java jar="dist/addressBook.jar" fork="true"/>
+  </target>
+</project>
